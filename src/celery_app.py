@@ -11,7 +11,14 @@ from src.models.models import Documents_text
 # from src.main import path_to_doc, app_dir
 app_dir = os.path.dirname(__file__)  # сохраняем в отдельную переменную
 
-celery_app = Celery("tasks", backend="redis://localhost", broker="redis://localhost")
+celery_app = Celery(
+    "tasks",
+    backend="redis://localhost",
+    broker="redis://localhost",
+    bind=True,
+    max_retries=3,
+    default_retry_delay=60,
+)
 # celery -A src.celery_app worker --loglevel=INFO
 
 
