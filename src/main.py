@@ -1,13 +1,9 @@
 import os
-import pathlib
-import shutil
 import uuid
-from pathlib import Path
 
+import uvicorn
 from fastapi import FastAPI, UploadFile, HTTPException
-from fastapi_cache import FastAPICache
 from sqlalchemy import select, delete
-from sqlalchemy.orm import joinedload
 from starlette.responses import FileResponse
 
 from src.database import async_session, session_
@@ -39,7 +35,6 @@ async def upload_doc(file: UploadFile) -> dict:
             contents = await file.read()
             with open(full_path, "wb") as name_file:
                 name_file.write(contents)
-                # return {'message': f'file {filename} has been uploaded'}
                 # Сохранение названия файла в БД
                 async with async_session() as session:
                     doc = Documents(path=filename)
@@ -70,6 +65,12 @@ def delete_doc(doc_id: int):
             query = select(Documents.path).filter(Documents.id == doc_id)
             result = session.scalar(query)
             # return result
+            if result is None:
+                return {
+                    "status": "error",
+                    "data": None,
+                    "details": "Запись с таким id отсутствует в БД",
+                }
             os.remove(os.path.join(app_dir, "documents", result))
             stmt = delete(Documents).filter(Documents.id == doc_id)
             session.execute(stmt)
@@ -98,6 +99,12 @@ async def doc_analyse(doc_id: int) -> dict:
         with session_() as session:
             query = select(Documents.path).filter(Documents.id == doc_id)
             result = session.scalar(query)
+            if result is None:
+                return {
+                    "status": "error",
+                    "data": None,
+                    "details": "Запись с таким id отсутствует в БД",
+                }
             scan.delay(os.path.join(app_dir, "documents", result), doc_id)
             return {
                 "status": "success",
@@ -123,43 +130,29 @@ def get_text(doc_id: int) -> dict:
         with session_() as session:
             query = select(Documents_text.text).filter(Documents_text.id_doc == doc_id)
             res = session.scalar(query)
+            if res is None:
+                return {
+                    "status": "error",
+                    "data": None,
+                    "details": "Запись с таким id отсутствует в БД",
+                }
+
             return {
                 "status": "success",
                 "data": f"{res}",
                 "details": None,
             }
 
-    except:
-        return {
-            "status": "error",
-            "data": None,
-            "details": "Неизвестная ошибка",
-        }
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "status": "error",
+                "data": None,
+                "details": "Неизвестная ошибка",
+            },
+        )
 
 
-print(get_text("1"))
-
-# @router.get("/get_text/{doc_id}")
-# async def get_text(doc_id: int, session: AsyncSession = Depends(get_async_session)):
-#     """По id документа получает текст обработанной картинки из таблицы Document_text\n
-#        и возвращает этот текст"""
-#     # проверяем есть ли запись с таким id в таблице Documents
-#     query = select(Documents).filter(Documents.id == doc_id)
-#     res = await session.execute(query)
-#     result = res.one_or_none()
-#     if result is None:
-#         return {
-#             "message": "error",
-#              "text": f"Записи с {doc_id=}  не существует"
-#         }
-#
-#     query = select(Documents_text.text).filter(Documents_text.id_doc == doc_id)
-#     res = await session.execute(query)
-#     result = res.one_or_none()
-#     if result is None:
-#         return {"message": "unknown",
-#                  "text":   f"Документа {doc_id=} найден, но не найдена связанная с ним запись. "
-#                            f"Возможно вы не задавали операцию расшифровки изображения, либо же расшифровка ещё обрабатывается."}
-#     else:
-#         return {"message": "success",
-#                 "text": result[0]}
+if __name__ == "__main__":
+    uvicorn.run("src.main:app", host="127.0.0.1", reload=True)
