@@ -24,8 +24,9 @@ def root_get():
 @app.post("/upload_doc", tags=["Загрузка файла, добавление записи в БД"])
 async def upload_doc(file: UploadFile) -> dict:
     """
+    :description: Сохранение файла на жесткий диск, добавление записи в БД
     :param file: UploadFile
-    :return: dict
+    :return: Сообщение о загрузке файла
     """
     try:
         if file.content_type.split("/")[0] == "image":
@@ -60,6 +61,11 @@ async def upload_doc(file: UploadFile) -> dict:
 
 @app.post("/doc_delete/{doc_id}", tags=["Удаление изображения с диска и из БД"])
 def delete_doc(doc_id: int):
+    """
+    :description: Удаление файла с жесткого диска, удаление записи из БД
+    :doc_id: id удаляемого файла
+    :return: Сообщение об удалении файла
+    """
     try:
         with session_() as session:
             query = select(Documents.path).filter(Documents.id == doc_id)
@@ -92,6 +98,7 @@ def delete_doc(doc_id: int):
 @app.post("/doc_analyse", tags=["Распознавание текста, его добавление в БД"])
 async def doc_analyse(doc_id: int) -> dict:
     """
+    :description: Распознавание текста с картинки, добавление текста в БД
     :param doc_id: id файла из БД
     :return: помещает распознанные текст в БД
     """
