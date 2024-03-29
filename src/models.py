@@ -4,7 +4,6 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 from typing import Optional, Annotated
 
-# from database import Base, engine
 
 intpk = Annotated[int, mapped_column(primary_key=True)]
 

@@ -25,13 +25,5 @@ async_session = async_sessionmaker(async_engine, class_=AsyncSession)
 class Base(DeclarativeBase):
     pass
 
-    # def __repr__(self):
-    #     cols = []
-    #     for idx, col in enumerate(self.__table__.columns.keys()):
-    #         if col in self.repr_cols or idx < self.repr_cols_num:
-    #             cols.append(f"{col}={getattr(self, col)}")
-    #
-    #     return f'<{self.__class__.__name__} {", ".join(cols)}>'
-
 
 metadata = MetaData()

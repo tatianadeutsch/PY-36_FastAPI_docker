@@ -1,5 +1,3 @@
-import os
-
 from PIL import Image
 import pytesseract
 from celery import Celery
@@ -8,8 +6,6 @@ from database import session_
 from models import Documents_text
 from configs import REDIS_HOST, REDIS_PORT
 
-# from src.main import path_to_doc, app_dir
-app_dir = os.path.dirname(__file__)  # сохраняем в отдельную переменную
 
 celery_app = Celery(
     "tasks",
@@ -47,9 +43,3 @@ def scan(image: str, doc_id=int) -> None:
         return None
 
 
-# print(
-#     scan(
-#         "/home/nepogoda/PycharmProjects/pythonProject/documents/a0e1e55c-c907-4c3c-9882-088cc1f35bd6.screen15.jpg",
-#         10,
-#     )
-# )

@@ -16,9 +16,6 @@ from configs import REDIS_HOST, REDIS_PORT
 
 app = FastAPI(title="MY_FastAPI")
 
-app_dir = os.path.dirname(__file__)  # сохраняем в отдельную переменную
-path_to_doc = os.path.join(app_dir, "documents")
-
 
 @app.get("/", tags=["Приветствие"])
 def root_get():
