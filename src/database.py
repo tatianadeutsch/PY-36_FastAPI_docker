@@ -1,7 +1,9 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from sqlalchemy import create_engine, MetaData
-from src.config import DB_USER, DB_PASS, DB_HOST, DB_PORT, DB_NAME
+
+
+from configs import DB_USER, DB_PASS, DB_HOST, DB_PORT, DB_NAME
 
 DATABASE_URL = (
     f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"

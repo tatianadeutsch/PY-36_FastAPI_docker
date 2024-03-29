@@ -2,24 +2,30 @@ import os
 
 from PIL import Image
 import pytesseract
-from fastapi import HTTPException
 from celery import Celery
 
-from src.database import session_
-from src.models.models import Documents_text
+from database import session_
+from models import Documents_text
+from configs import REDIS_HOST, REDIS_PORT
 
 # from src.main import path_to_doc, app_dir
 app_dir = os.path.dirname(__file__)  # сохраняем в отдельную переменную
 
 celery_app = Celery(
     "tasks",
-    backend="redis://localhost",
-    broker="redis://localhost",
+    # backend=f"redis://localhost",
+    # broker=f"redis://localhost",
+    # для докера, иначе не разворачивается!!!
+    backend=f"redis://{REDIS_HOST}:{REDIS_PORT}",
+    broker=f"redis://{REDIS_HOST}:{REDIS_PORT}",
     bind=True,
     max_retries=3,
     default_retry_delay=60,
+    broker_connection_retry_on_startup=True,
 )
-# celery -A src.celery_app worker --loglevel=INFO
+# celery -A src.celery_app:celery_app worker --loglevel=INFO # --pool=solo - для винды
+# celery -A src.celery_app:celery_app flower - запуск визуализации процессов
+# http://localhost:5555/ - вход на сервер селери flower
 
 
 @celery_app.task
@@ -39,3 +45,11 @@ def scan(image: str, doc_id=int) -> None:
 
     except:
         return None
+
+
+# print(
+#     scan(
+#         "/home/nepogoda/PycharmProjects/pythonProject/documents/a0e1e55c-c907-4c3c-9882-088cc1f35bd6.screen15.jpg",
+#         10,
+#     )
+# )

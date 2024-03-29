@@ -1,12 +1,16 @@
 from datetime import datetime, timezone
 
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 from typing import Optional, Annotated
 
-from src.database import Base, engine
+# from database import Base, engine
 
 intpk = Annotated[int, mapped_column(primary_key=True)]
+
+
+class Base(DeclarativeBase):
+    pass
 
 
 class Documents(Base):
